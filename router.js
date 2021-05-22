@@ -7,6 +7,6 @@ router.post('/users/check', controller.checkUser);
 
 router.get('/assets', controller.getAllAssets);
 router.get('/assets/:userId', controller.getUserCatalogue);
-router.post('/assets', controller.addAsset);
+router.post('/assets', controller.saveAsset);
 
 module.exports = router;

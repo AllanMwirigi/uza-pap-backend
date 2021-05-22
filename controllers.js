@@ -50,11 +50,19 @@ exports.getUserCatalogue = async (req, res, next) => {
   }
 }
 
-exports.addAsset = async (req, res, next) => {
+exports.saveAsset = async (req, res, next) => {
   try {
-    const asset = new Asset(req.body);
-    const doc = await asset.save();
-    res.status(201).json({ assetId: doc._id });
+    const { assetId } = req.body;
+    if (assetId == null) {
+      const asset = new Asset(req.body);
+      const doc = await asset.save();
+      res.status(201).json({ assetId: doc._id });
+      console.log('item added');
+    } else {
+      await Asset.updateOne({ _id: assetId }, req.body).exec();
+      res.status(200).json();
+      console.log('item updated');
+    }
   } catch (error) {
     next(error);
   }
