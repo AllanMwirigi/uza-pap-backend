@@ -4,6 +4,7 @@ require("dotenv").config();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const router = require('./router');
 
 let originsList;
@@ -47,7 +48,39 @@ app.use((err, req, res, next) => {
   console.error(`${err.status || 500} - ${req.method} ${req.url} - ${err.message}`);
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`Payment server listening at http://localhost:${PORT} | environment: ${process.env.NODE_ENV}`)
-);
+const connectionOptions = {
+  useCreateIndex: true,
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
+};
+mongoose
+  .connect(process.env.DB_URL, connectionOptions)
+  .then()
+  .catch((err) => {
+    if (err) console.error(`initial database connection error: ${err.message}`);
+    else console.error(`initial database connection error`);
+  });
+
+// connection successful
+mongoose.connection.once('open', () => {
+  console.log(`MongoDB Connected`);
+  // server starts listening only if connected to database
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () =>
+    console.log(`Backend listening on http://localhost:${PORT} | environment: ${process.env.NODE_ENV}`)
+  );
+});
+
+// connection throws an error
+mongoose.connection.on('error', (err) => {
+  if (err) console.error(`database connection error: ${err.message}`);
+  else console.error(`database connection error`);
+});
+// connection is disconnected
+mongoose.connection.on('disconnected', (err) => {
+  if (err) {
+    console.error(`database disconnected: ${err.message}`);
+  }
+  else console.error(`database disconnected`);
+});

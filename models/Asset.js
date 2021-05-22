@@ -8,3 +8,6 @@ const assetSchema = new Schema({
   location: { type: String, required: true },
   description: { type: String, required: true },
 });
+
+const Asset = mongoose.model('asset', assetSchema);
+module.exports = Asset;

@@ -6,8 +6,10 @@
   "author": "Allan Mwirigi",
   "license": "MIT",
   "private": true,
-  "start": "node index.js",
-  "start:dev": "NODE_ENV=development nodemon index.js",
+  "scripts": {
+    "start": "node index.js",
+    "start:dev": "NODE_ENV=development nodemon index.js"
+  },
   "dependencies": {
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
