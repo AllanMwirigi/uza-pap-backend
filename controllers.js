@@ -3,6 +3,7 @@ const Asset = require('./models/Asset');
 
 exports.registerUser = async (req, res, next) => {
   try {
+    const { email } = req.body;
     let user = await User.findOne({ email }).lean().exec();
     if (user) {
       res.sendStatus(409);
@@ -19,7 +20,7 @@ exports.registerUser = async (req, res, next) => {
 exports.checkUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email, password }).lean().exec();
+    const user = await User.findOne({ email, password }).select('-password').lean().exec();
     if (!user) {
       res.sendStatus(404);
       return;
