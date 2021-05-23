@@ -7,6 +7,7 @@ const assetSchema = new Schema({
   price: { type: Number, required: true },
   location: { type: String, required: true },
   description: { type: String, required: true },
+  picUrl: { type: String, required: true },
   category: { type: Number, default: -1 },
   purchased: { type: Boolean }
 });

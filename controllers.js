@@ -3,6 +3,7 @@ const Asset = require('./models/Asset');
 const Purchase = require('./models/Purchase');
 const Daraja = require('./utils/Daraja');
 const nodecache = require('./utils/cache');
+const { sendEmail } = require('./utils/email');
 
 const PAYMENT_STATUS_FAILED = 0, PAYMENT_STATUS_SUCCESS = 1;
 const KEY_ACCESS_TOKEN = "DarajaToken";
@@ -102,7 +103,7 @@ exports.purchaseAsset = async (req, res, next) => {
 
     let callBackUrl;
     if(process.env.NODE_ENV == 'development'){
-        callBackUrl = "https://555e7de31fa2.ngrok.io/api/v1/assets/payment/notification";
+        callBackUrl = "https://a5e75b21defb.ngrok.io/api/v1/assets/payment/notification";
     }
     // if(process.env.NODE_ENV == 'production'){
     else {
@@ -194,14 +195,23 @@ exports.onReceivePaymentNotification = async (req, res, next) =>{
     }
 
     const timePaid = new Date().toISOString();
-    const doc = await Purchase.findOneAndUpdate({ checkoutRequestId, merchantRequestId }, 
+    const purchaseDoc = await Purchase.findOneAndUpdate({ checkoutRequestId, merchantRequestId }, 
       {paymentStatus: PAYMENT_STATUS_SUCCESS, timePaid, mpesaResultCode: resultCode }
     ).lean().exec();
-    await Asset.updateOne( { _id: doc.asset }, { purchased: true }).exec();
+    const assetDoc = await Asset.findOneAndUpdate( { _id: purchaseDoc.asset }, { purchased: true }).exec();
 
-    // to socket.io
+    // send email alert to seller // TODO: populate from assetDoc
+    const seller = await User.findById(assetDoc.userId).lean().exec();
+    const msg = `<p>Greetings, ${seller.firstName}</>
+      <p>An item you posted (Name: ${assetDoc.name}) has been purchased for Ksh.${purchaseDoc.amount}</p>
+      <p>The funds will be released to you upon delivery and approval of the item by the buyer</>
+      <p>Thank you for your continued support</>
+      <p>Regards, <br><b>UzaPap Team</b></p>`;
+    sendEmail('UzaPap - Item Purchased', seller.email, msg);
+
+    // update buyer via socket.io
     res.locals.sockdata = {
-      userId: doc.userId, paymentStatus: PAYMENT_STATUS_SUCCESS
+      userId: purchaseDoc.userId, paymentStatus: PAYMENT_STATUS_SUCCESS
     };
     next();
   } catch(error) {
