@@ -13,8 +13,8 @@ const PurchaseSchema = new Schema({
   timePaid: { type: String },
 });
 
-const PurchaseSchema = mongoose.model('Purchase', PurchaseSchema);
-module.exports = PurchaseSchema;
+const Purchase = mongoose.model('Purchase', PurchaseSchema);
+module.exports = Purchase;
 
 // STK Push completed successfully
 // {

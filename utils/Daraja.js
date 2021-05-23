@@ -38,6 +38,7 @@ exports.initDaraja = (agenda) => {
 
   (async ()=>{
     agenda.on('ready', async()=>{
+      console.log('agenda ready')
       await agenda.start();
       await agenda.every('50 minutes', 'refreshDarajaToken');
     });

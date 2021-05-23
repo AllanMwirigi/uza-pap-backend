@@ -163,9 +163,12 @@ exports.onReceivePaymentNotification = async (req, res, next) =>{
         const doc = await Purchase.findOneAndUpdate({ checkoutRequestId, merchantRequestId }, 
           { paymentStatus: PAYMENT_STATUS_FAILED, mpesaResultCode: resultCode }
         ).select('userId').lean().exec();
-        // TODO: socket.io
-        // let messageToSend = "Error processing payment. Kindly try again";
-        // sendNotifToApp(doc.userNotifToken, messageToSend, PAYMENT_FAILED);
+
+        // to socket.io
+        res.locals.sockdata = {
+          userId: doc.userId, paymentStatus: PAYMENT_STATUS_FAILED,
+        };
+        next();
         console.error(`Mpesa Callback non-zero result code ${resultCode} - purchaseId ${doc._id}`);
       }catch(error){
         console.error(`Mpesa Callback non-zero result | DB | ${error.message}`);
@@ -174,11 +177,15 @@ exports.onReceivePaymentNotification = async (req, res, next) =>{
     }
 
     const timePaid = new Date().toISOString();
-    const obj = await Purchase.findOneAndUpdate({ checkoutRequestId, merchantRequestId }, 
+    const doc = await Purchase.findOneAndUpdate({ checkoutRequestId, merchantRequestId }, 
       {paymentStatus: PAYMENT_STATUS_SUCCESS, timePaid, mpesaResultCode: resultCode }
     ).select('userId').lean().exec();
-    // TODO: socket.io
 
+    // to socket.io
+    res.locals.sockdata = {
+      userId: doc.userId, paymentStatus: PAYMENT_STATUS_SUCCESS
+    };
+    next();
   } catch(error) {
     console.error(`Mpesa Callback | ${error.message}`);
   }

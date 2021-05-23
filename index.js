@@ -6,6 +6,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const Agenda = require('agenda');
+const http = require('http');
 const router = require('./router');
 const Daraja = require('./utils/Daraja');
 
@@ -25,7 +26,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use('/api/v1', router);
+app.use('/api/v1', router, emitPaymentStatus);
 
 // any invalid endpoints that get past the above are handled here
 app.use((req, res, next) => {
@@ -67,15 +68,17 @@ mongoose
 const agenda = new Agenda({
   db: {
       address: process.env.DB_URL,
-    //   options: {
-    //     useNewUrlParser: true,
-    //     useUnifiedTopology: true
-    //   }
+      options: {
+        // useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
   },
   processEvery: '30 seconds'
 //   processEvery: '3 minutes'
 });
 agenda.on('error', err =>{ console.error(`Agenda | ${err.message}`) });
+
+const server = http.createServer(app);
 
 // connection successful
 mongoose.connection.once('open', () => {
@@ -83,7 +86,7 @@ mongoose.connection.once('open', () => {
   Daraja.initDaraja(agenda);
   // server starts listening only if connected to database
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () =>
+  server.listen(PORT, () =>
     console.log(`Backend listening on http://localhost:${PORT} | environment: ${process.env.NODE_ENV}`)
   );
 });
@@ -107,3 +110,24 @@ async function endAgendaGracefully() {
 }
 process.on('SIGTERM', endAgendaGracefully);
 process.on('SIGINT', endAgendaGracefully);
+
+const socketio = require('socket.io')(server, {
+  cors: {
+    origin: originsList,
+    // if using socket.io v3, then these two are needed; had to downgrade to v2.3 because ngx-socket-io client in Angular didn't seem to be comaptible, was giving 400 errors
+    // methods: ["GET", "POST"],
+    // credentials: true
+  }
+});
+
+socketio.on('connection', (socket) => {
+  
+});
+
+function emitPaymentStatus(req, res, next) {
+  try {
+    socketio.emit('payment', res.locals.sockdata);
+  } catch (error) {
+    next(error);
+  }
+}
