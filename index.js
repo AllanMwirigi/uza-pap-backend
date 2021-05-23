@@ -5,7 +5,9 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const Agenda = require('agenda');
 const router = require('./router');
+const Daraja = require('./utils/Daraja');
 
 let originsList;
 if (process.env.NODE_ENV === 'development') {
@@ -32,7 +34,7 @@ app.use((req, res, next) => {
     next();
     return;
   }
-  res.sendStatus(404);
+  res.status(404).json();
 });
 
 // custom error handling middleware i.e. for errors passed in next(error)
@@ -62,9 +64,23 @@ mongoose
     else console.error(`initial database connection error`);
   });
 
+const agenda = new Agenda({
+  db: {
+      address: process.env.DB_URL,
+    //   options: {
+    //     useNewUrlParser: true,
+    //     useUnifiedTopology: true
+    //   }
+  },
+  processEvery: '30 seconds'
+//   processEvery: '3 minutes'
+});
+agenda.on('error', err =>{ console.error(`Agenda | ${err.message}`) });
+
 // connection successful
 mongoose.connection.once('open', () => {
   console.log(`MongoDB Connected`);
+  Daraja.initDaraja(agenda);
   // server starts listening only if connected to database
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () =>
@@ -84,3 +100,10 @@ mongoose.connection.on('disconnected', (err) => {
   }
   else console.error(`database disconnected`);
 });
+
+async function endAgendaGracefully() {
+  await agenda.stop();
+  process.exit(0);
+}
+process.on('SIGTERM', endAgendaGracefully);
+process.on('SIGINT', endAgendaGracefully);
