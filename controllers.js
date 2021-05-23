@@ -105,9 +105,8 @@ exports.purchaseAsset = async (req, res, next) => {
     if(process.env.NODE_ENV == 'development'){
         callBackUrl = "https://a5e75b21defb.ngrok.io/api/v1/assets/payment/notification";
     }
-    // if(process.env.NODE_ENV == 'production'){
     else {
-        callBackUrl = "https://abowest-202410.appspot.com/api/v1/assets/payment/notification";
+        callBackUrl = "https://uza-pap.herokuapp.com/api/v1/assets/payment/notification";
     }
 
     const data = {
