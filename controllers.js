@@ -72,6 +72,17 @@ exports.saveAsset = async (req, res, next) => {
   }
 }
 
+exports.getUserPurchases = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const purchases = await Purchase.find({ userId, paymentStatus: PAYMENT_STATUS_SUCCESS }).select('asset amount timePaid')
+      .populate('asset').lean().exec();
+    res.status(200).json({ purchases });
+  } catch(error) {
+    next(error);
+  }
+}
+
 exports.purchaseAsset = async (req, res, next) => {
   try {
     const { userId, assetId, phoneNo, price } = req.body;

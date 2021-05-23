@@ -11,5 +11,5 @@ const assetSchema = new Schema({
   purchased: { type: Boolean }
 });
 
-const Asset = mongoose.model('asset', assetSchema);
+const Asset = mongoose.model('Asset', assetSchema);
 module.exports = Asset;

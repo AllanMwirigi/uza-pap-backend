@@ -9,5 +9,5 @@ const userSchema = new Schema({
   password: { type: String, required: true }, // IMPORTANT!!!- this is a hack; please remove if ever proceed with this thing
 });
 
-const User = mongoose.model('user', userSchema);
+const User = mongoose.model('User', userSchema);
 module.exports = User;

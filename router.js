@@ -10,5 +10,6 @@ router.get('/assets/:userId', controller.getUserCatalogue);
 router.post('/assets', controller.saveAsset);
 router.post('/assets/purchase', controller.purchaseAsset);
 router.post('/assets/payment/notification', controller.onReceivePaymentNotification);
+router.get('/purchases/:userId', controller.getUserPurchases);
 
 module.exports = router;

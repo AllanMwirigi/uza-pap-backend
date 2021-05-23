@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 // maybe should have pendingmpesa as not all purchases may use mpesa
 const PurchaseSchema = new Schema({
   userId: { type: String, required: true, index: true },
-  asset: { type: Schema.Types.ObjectId, ref: 'assets', required: true },
+  asset: { type: Schema.Types.ObjectId, ref: 'Asset', required: true },
   amount: { type: Number, required: true }, // might be different from the listed price of the asset
   merchantRequestId: { type: String, required: true, index: true }, // returned by MPESA
   checkoutRequestId: {type: String, required: true, index: true}, //  returned by MPESA

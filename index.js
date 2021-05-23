@@ -26,7 +26,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use('/api/v1', router, emitPaymentStatus);
+app.use('/api/v1', router, emitPaymentStatus); // TODO: have different routers so that if none matched can go to 404 below
 
 // any invalid endpoints that get past the above are handled here
 app.use((req, res, next) => {
