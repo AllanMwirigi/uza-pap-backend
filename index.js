@@ -121,12 +121,12 @@ const socketio = require('socket.io')(server, {
 });
 
 socketio.on('connection', (socket) => {
-  
+
 });
 
 function emitPaymentStatus(req, res, next) {
   try {
-    socketio.emit('payment', res.locals.sockdata);
+    socketio.emit('payment-update', res.locals.sockdata);
   } catch (error) {
     next(error);
   }

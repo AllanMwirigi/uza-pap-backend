@@ -36,7 +36,7 @@ exports.initDaraja = (agenda) => {
     });
   });
 
-  (async ()=>{
+  (async ()=> {
     agenda.on('ready', async()=>{
       console.log('agenda ready')
       await agenda.start();

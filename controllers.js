@@ -2,6 +2,7 @@ const User = require('./models/User');
 const Asset = require('./models/Asset');
 const Purchase = require('./models/Purchase');
 const Daraja = require('./utils/Daraja');
+const nodecache = require('./utils/cache');
 
 const PAYMENT_STATUS_FAILED = 0, PAYMENT_STATUS_SUCCESS = 1;
 const KEY_ACCESS_TOKEN = "DarajaToken";
@@ -38,7 +39,7 @@ exports.checkUser = async (req, res, next) => {
 
 exports.getAllAssets = async (req, res, next) => {
   try {
-    const assets = await Asset.find({}).lean().exec();
+    const assets = await Asset.find({ purchased: { $exists: false } }).lean().exec();
     res.status(200).json({ assets });
   } catch (error) {
     next(error);
@@ -85,7 +86,7 @@ exports.purchaseAsset = async (req, res, next) => {
 
     let callBackUrl;
     if(process.env.NODE_ENV == 'development'){
-        callBackUrl = "http://d0b9b5dca12e.ngrok.io/api/v1/assets/payment/notification";
+        callBackUrl = "https://555e7de31fa2.ngrok.io/api/v1/assets/payment/notification";
     }
     // if(process.env.NODE_ENV == 'production'){
     else {
@@ -128,7 +129,7 @@ exports.purchaseAsset = async (req, res, next) => {
           return;
       }
       const purchaseData = {
-        userId, assetId, price,
+        userId, asset: assetId, amount: price,
         merchantRequestId: response.data.MerchantRequestID,
         checkoutRequestId: response.data.CheckoutRequestID,
       };
@@ -179,7 +180,8 @@ exports.onReceivePaymentNotification = async (req, res, next) =>{
     const timePaid = new Date().toISOString();
     const doc = await Purchase.findOneAndUpdate({ checkoutRequestId, merchantRequestId }, 
       {paymentStatus: PAYMENT_STATUS_SUCCESS, timePaid, mpesaResultCode: resultCode }
-    ).select('userId').lean().exec();
+    ).lean().exec();
+    await Asset.updateOne( { _id: doc.asset }, { purchased: true }).exec();
 
     // to socket.io
     res.locals.sockdata = {

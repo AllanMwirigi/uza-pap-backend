@@ -4,9 +4,9 @@ const Schema = mongoose.Schema;
 // maybe should have pendingmpesa as not all purchases may use mpesa
 const PurchaseSchema = new Schema({
   userId: { type: String, required: true, index: true },
-  asset: { type: mongoose.Types.ObjectId, required: true },
+  asset: { type: Schema.Types.ObjectId, ref: 'assets', required: true },
   amount: { type: Number, required: true }, // might be different from the listed price of the asset
-  merchantRequestId: {type: String}, // returned by MPESA
+  merchantRequestId: { type: String, required: true, index: true }, // returned by MPESA
   checkoutRequestId: {type: String, required: true, index: true}, //  returned by MPESA
   mpesaResultCode: { type: Number }, //  returned by MPESA, 0 is success
   paymentStatus: { type: Number, default: -1 }, // 0 - failed, 1- successful, -1 - not processed
