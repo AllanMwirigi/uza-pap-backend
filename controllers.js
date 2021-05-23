@@ -39,7 +39,12 @@ exports.checkUser = async (req, res, next) => {
 
 exports.getAllAssets = async (req, res, next) => {
   try {
-    const assets = await Asset.find({ purchased: { $exists: false } }).lean().exec();
+    // const assets = await Asset.find({ purchased: { $exists: false } }).lean().exec();
+    // res.status(200).json({ assets });
+    const assets = await Asset.aggregate([
+      { $match: { purchased: { $exists: false } }},
+      { $group: { _id: "$category", assets: { $push: "$$ROOT" } } }
+    ]).exec();
     res.status(200).json({ assets });
   } catch (error) {
     next(error);
