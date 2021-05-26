@@ -82,7 +82,7 @@ exports.getUserPurchases = async (req, res, next) => {
   try {
     const { userId } = req.params;
     const purchases = await Purchase.find({ userId, paymentStatus: PAYMENT_STATUS_SUCCESS }).select('asset amount timePaid')
-      .populate('asset').lean().exec();
+      .sort({ 'timePaid': 'descending' }).populate('asset').lean().exec();
     res.status(200).json({ purchases });
   } catch(error) {
     next(error);
@@ -103,7 +103,7 @@ exports.purchaseAsset = async (req, res, next) => {
 
     let callBackUrl;
     if(process.env.NODE_ENV == 'development'){
-        callBackUrl = "https://a5e75b21defb.ngrok.io/api/v1/assets/payment/notification";
+        callBackUrl = "https://3bf150f8ac35.ngrok.io/api/v1/assets/payment/notification";
     }
     else {
         callBackUrl = "https://uza-pap.herokuapp.com/api/v1/assets/payment/notification";

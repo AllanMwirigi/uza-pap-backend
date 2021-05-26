@@ -23,6 +23,7 @@ exports.sendEmail = async (subject, receipientEmail, htmlMsg) => {
       subject, // Subject line
       html: htmlMsg // plain text body
     };
+    console.log('email creds', emailName, emailPass);
     transporter.sendMail(mailOptions, (err, /* info */) => {
       if (err) console.error(`email | ${err.message}`);
     });

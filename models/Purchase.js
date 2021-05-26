@@ -10,7 +10,7 @@ const PurchaseSchema = new Schema({
   checkoutRequestId: {type: String, required: true, index: true}, //  returned by MPESA
   mpesaResultCode: { type: Number }, //  returned by MPESA, 0 is success
   paymentStatus: { type: Number, default: -1 }, // 0 - failed, 1- successful, -1 - not processed
-  timePaid: { type: String },
+  timePaid: { type: Date },
 });
 
 const Purchase = mongoose.model('Purchase', PurchaseSchema);
