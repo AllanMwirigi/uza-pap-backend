@@ -6,7 +6,10 @@ const emailPass = process.env.EMAIL_PASS;
 // const emailHost = environment.EMAIL_HOST;
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // if gmail giving BadCredentials error, try allow less secure apps
+  // if gmail giving BadCredentials error or Invalid login, try allow less secure apps
+  // and/or https://accounts.google.com/b/0/DisplayUnlockCaptcha
+
+  service: 'gmail', 
   // host: emailHost,
   auth: {
     user: emailName,
@@ -23,7 +26,6 @@ exports.sendEmail = async (subject, receipientEmail, htmlMsg) => {
       subject, // Subject line
       html: htmlMsg // plain text body
     };
-    console.log('email creds', emailName, emailPass);
     transporter.sendMail(mailOptions, (err, /* info */) => {
       if (err) console.error(`email | ${err.message}`);
     });
