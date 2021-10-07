@@ -105,8 +105,14 @@ mongoose.connection.on('disconnected', (err) => {
 });
 
 async function endAgendaGracefully() {
-  await agenda.stop();
-  process.exit(0);
+  try {
+    await agenda.stop();
+    process.exit(0);
+  } catch (error) {
+    if (error.message) console.error('error stopping agenda', error.message)
+    else console.error('error stopping agenda')
+    process.exit(0);
+  }
 }
 process.on('SIGTERM', endAgendaGracefully);
 process.on('SIGINT', endAgendaGracefully);
